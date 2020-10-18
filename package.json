@@ -1,0 +1,45 @@
+{
+  "name": "xprezzo-finalhandler",
+  "description": "xprezzo final http responder",
+  "version": "1.1.1",
+  "author": "Ben Ajenoui <info@seohero.io>",
+  "license": "MIT",
+  "repository": "xprezzo/xprezzo-finalhandler",
+  "dependencies": {
+    "escape-html": "~1.0.3",
+    "encodeurl": "~1.0.2",
+    "parseurl": "~1.3.3",
+    "statuses": "~2.0.0",
+    "xprezzo-stream-unpipe": "1.0.0",
+    "xprezzo-debug": "1.1.1",
+    "xprezzo-on-finished": "1.1.1"
+  },
+  "devDependencies": {
+    "eslint": "7.11.0",
+    "eslint-config-standard": "14.1.1",
+    "eslint-plugin-import": "2.22.1",
+    "eslint-plugin-markdown": "1.0.2",
+    "eslint-plugin-node": "11.1.0",
+    "eslint-plugin-promise": "4.2.1",
+    "eslint-plugin-standard": "4.0.1",
+    "mocha": "8.2.0",
+    "nyc": "15.1.0",
+    "readable-stream": "2.3.6",
+    "xprezzo-buffer": "1.0.1",
+    "supertest": "4.0.2"
+  },
+  "files": [
+    "LICENSE",
+    "HISTORY.md",
+    "index.js"
+  ],
+  "engines": {
+    "node": ">= 0.8"
+  },
+  "scripts": {
+    "lint": "eslint --plugin markdown --ext js,md .",
+    "test": "mocha --reporter spec --bail --check-leaks test/",
+    "test-ci": "nyc --reporter=text npm test -- --no-exit",
+    "test-cov": "nyc --reporter=html --reporter=text npm test"
+  }
+}
