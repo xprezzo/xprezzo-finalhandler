@@ -129,7 +129,7 @@ function logerror (err) {
 
 ## People
 
-Xprezzo and related projects are maintained by [Cloudgen Wng](mailto:cloudgen.wong@gmail.com).
+Xprezzo and related projects are maintained by [Cloudgen Wong](mailto:cloudgen.wong@gmail.com).
 
 ## License
 

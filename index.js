@@ -1,7 +1,15 @@
 /*!
  * xprezzo-finalhandler
- * Copyright(c) 2020 Ben Ajenoui <info@seohero.io>
+ * Copyright(c) 2022 Cloudgen Wong <cloudgen.wong@gmail.com>
  * MIT Licensed
+ *
+ * Create a function to handle the final response.
+ *
+ * @param {Request} req
+ * @param {Response} res
+ * @param {Object} [options]
+ * @return {Function}
+ * @public
  */
 
 'use strict'
@@ -23,15 +31,14 @@ const unpipe = require('xprezzo-stream-unpipe')
  * Module variables.
  * @private
  */
-
-var DOUBLE_SPACE_REGEXP = /\x20{2}/g
-var NEWLINE_REGEXP = /\n/g
+let DOUBLE_SPACE_REGEXP = /\x20{2}/g
+let NEWLINE_REGEXP = /\n/g
 
 /* istanbul ignore next */
-var defer = typeof setImmediate === 'function'
+let defer = typeof setImmediate === 'function'
   ? setImmediate
   : function (fn) { process.nextTick(fn.bind.apply(fn, arguments)) }
-var isFinished = onFinished.isFinished
+let isFinished = onFinished.isFinished
 
 /**
  * Create a minimal HTML document.
@@ -39,9 +46,8 @@ var isFinished = onFinished.isFinished
  * @param {string} message
  * @private
  */
-
-function createHtmlDocument (message) {
-  var body = escapeHtml(message)
+const createHtmlDocument = (message) => {
+  let body = escapeHtml(message)
     .replace(NEWLINE_REGEXP, '<br>')
     .replace(DOUBLE_SPACE_REGEXP, ' &nbsp;')
 
@@ -58,100 +64,22 @@ function createHtmlDocument (message) {
 }
 
 /**
- * Module exports.
- * @public
- */
-
-module.exports = finalhandler
-
-/**
- * Create a function to handle the final response.
- *
- * @param {Request} req
- * @param {Response} res
- * @param {Object} [options]
- * @return {Function}
- * @public
- */
-
-function finalhandler (req, res, options) {
-  var opts = options || {}
-
-  // get environment
-  var env = opts.env || process.env.NODE_ENV || 'development'
-
-  // get error callback
-  var onerror = opts.onerror
-
-  return function (err) {
-    var headers
-    var msg
-    var status
-
-    // cannot actually respond
-    if (headersSent(res)) {
-      debug('cannot %d after headers sent', status)
-      res.end('')
-      return this
-    }
-
-    // unhandled error
-    if (err) {
-      // respect status code from error
-      status = getErrorStatusCode(err)
-
-      if (status === undefined) {
-        // fallback to status code on response
-        status = getResponseStatusCode(res)
-      } else {
-        // respect headers from error
-        headers = getErrorHeaders(err)
-      }
-
-      // get error message
-      msg = getErrorMessage(err, status, env)
-    } else {
-      // not found
-      status = 404
-      msg = 'Cannot ' + req.method + ' ' + encodeUrl(getResourceName(req))
-    }
-    debug('error dispatching %s %s', req.method, encodeUrl(getResourceName(req)))
-    if (opts.app && typeof opts.app.emit === 'function') {
-      opts.app.emit('errorDispatch', {
-        method: req.method,
-        url: encodeUrl(getResourceName(req))
-      })
-    }
-    debug('default %s', status)
-
-    // schedule onerror callback
-    if (err && onerror) {
-      defer(onerror, err, req, res)
-    }
-
-    // send response
-    send(req, res, status, headers, msg)
-  }
-}
-
-/**
  * Get headers from Error object.
  *
  * @param {Error} err
  * @return {object}
  * @private
  */
-
-function getErrorHeaders (err) {
+ const getErrorHeaders = (err) => {
   if (!err.headers || typeof err.headers !== 'object') {
     return undefined
   }
 
-  var headers = Object.create(null)
-  var keys = Object.keys(err.headers)
+  let headers = Object.create(null)
+  let keys = Object.keys(err.headers)
 
-  for (var i = 0; i < keys.length; i++) {
-    var key = keys[i]
+  for (let i = 0; i < keys.length; i++) {
+    let key = keys[i]
     headers[key] = err.headers[key]
   }
 
@@ -167,9 +95,8 @@ function getErrorHeaders (err) {
  * @return {string}
  * @private
  */
-
-function getErrorMessage (err, status, env) {
-  var msg
+const getErrorMessage = (err, status, env) => {
+  let msg
 
   if (env !== 'production') {
     // use err.stack, which typically includes err.message
@@ -191,8 +118,7 @@ function getErrorMessage (err, status, env) {
  * @return {number}
  * @private
  */
-
-function getErrorStatusCode (err) {
+const getErrorStatusCode = (err) => {
   // check err.status
   if (typeof err.status === 'number' && err.status >= 400 && err.status < 600) {
     return err.status
@@ -216,8 +142,7 @@ function getErrorStatusCode (err) {
  * @return {string}
  * @private
  */
-
-function getResourceName (req) {
+const getResourceName = (req) => {
   try {
     return parseUrl.original(req).pathname
   } catch (e) {
@@ -232,9 +157,8 @@ function getResourceName (req) {
  * @return {number}
  * @private
  */
-
-function getResponseStatusCode (res) {
-  var status = res.statusCode
+const getResponseStatusCode = (res) => {
+  let status = res.statusCode
 
   // default status code to 500 if outside valid range
   if (typeof status !== 'number' || status < 400 || status > 599) {
@@ -251,8 +175,7 @@ function getResponseStatusCode (res) {
  * @returns {boolean}
  * @private
  */
-
-function headersSent (res) {
+const headersSent = (res) => {
   return typeof res.headersSent !== 'boolean'
     ? Boolean(res._header)
     : res.headersSent
@@ -268,11 +191,10 @@ function headersSent (res) {
  * @param {string} message
  * @private
  */
-
-function send (req, res, status, headers, message) {
-  function write () {
+const sendResponse = (req, res, status, headers, message) => {
+  let write = () => {
     // response body
-    var body = createHtmlDocument(message)
+    let body = createHtmlDocument(message)
 
     // response status
     res.statusCode = status
@@ -317,15 +239,79 @@ function send (req, res, status, headers, message) {
  * @param {object} headers
  * @private
  */
-
-function setHeaders (res, headers) {
+const setHeaders = (res, headers) => {
   if (!headers) {
     return
   }
 
-  var keys = Object.keys(headers)
-  for (var i = 0; i < keys.length; i++) {
-    var key = keys[i]
+  let keys = Object.keys(headers)
+  for (let i = 0; i < keys.length; i++) {
+    let key = keys[i]
     res.setHeader(key, headers[key])
   }
 }
+
+/**
+ * Module exports.
+ * @public
+ */
+module.exports = (req, res, options) => {
+  let opts = options || {}
+
+  // get environment
+  let env = opts.env || process.env.NODE_ENV || 'development'
+
+  // get error callback
+  let onerror = opts.onerror
+
+  return function (err) {
+    let headers
+    let msg
+    let status
+
+    // cannot actually respond
+    if (headersSent(res)) {
+      debug('cannot %d after headers sent', status)
+      res.end('')
+      return this
+    }
+
+    // unhandled error
+    if (err) {
+      // respect status code from error
+      status = getErrorStatusCode(err)
+
+      if (status === undefined) {
+        // fallback to status code on response
+        status = getResponseStatusCode(res)
+      } else {
+        // respect headers from error
+        headers = getErrorHeaders(err)
+      }
+
+      // get error message
+      msg = getErrorMessage(err, status, env)
+    } else {
+      // not found
+      status = 404
+      msg = 'Cannot ' + req.method + ' ' + encodeUrl(getResourceName(req))
+    }
+    debug('error dispatching %s %s', req.method, encodeUrl(getResourceName(req)))
+    if (opts.app && typeof opts.app.emit === 'function') {
+      opts.app.emit('errorDispatch', {
+        method: req.method,
+        url: encodeUrl(getResourceName(req))
+      })
+    }
+    debug('default %s', status)
+
+    // schedule onerror callback
+    if (err && onerror) {
+      defer(onerror, err, req, res)
+    }
+
+    // send response
+    sendResponse(req, res, status, headers, msg)
+  }
+}
+
